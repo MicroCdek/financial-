@@ -69,11 +69,16 @@ func (status OrderStatus) String() string {
 	}
 }
 
-type Trader struct {
-	ID        uuid.UUID
-	Name      string
-	Vallut    float64
-	CreatedAt time.Time
+type Trade struct {
+	ID         uuid.UUID
+	Symbol     string
+	BuyOrderID uuid.UUID
+	SelOrderID uuid.UUID
+	BuyerID    uuid.UUID
+	SellerID   uuid.UUID
+	Price      float64
+	Quantity   float64
+	ExecutedAt time.Time
 }
 
 type Order struct {
@@ -96,18 +101,6 @@ func (order *Order) Remaining() float64 {
 
 func (order *Order) IsActive() bool {
 	return order.Status == OrderStatusNew || order.Status == OrderStatusPartiallyFilled
-}
-
-type Trade struct {
-	ID         uuid.UUID
-	Symbol     string
-	BuyOrderID uuid.UUID
-	SelOrderID uuid.UUID
-	BuyerID    uuid.UUID
-	SellerID   uuid.UUID
-	Price      float64
-	Quantity   float64
-	ExecutedAt time.Time
 }
 
 // position1.price = 0.1

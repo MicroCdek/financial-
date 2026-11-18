@@ -2,6 +2,7 @@ package main
 
 import (
 	"enump/enum"
+	"enump/modifiers"
 	storage "enump/store"
 	"fmt"
 	"log/slog"
@@ -47,7 +48,7 @@ func main() {
 	}
 
 	orderBook := storage.NewIndexedStore[uuid.UUID, enum.Order](100)
-
+	
 	uuidOrder1 := uuid.New()
 	uuidOrder2 := uuid.New()
 
@@ -81,24 +82,39 @@ func main() {
 	orderBook.Put(uuidOrder1, orderBuy)
 	orderBook.Put(uuidOrder2, orderSell)
 
-	logger.Info("Зарегистрирована сделка",
+	// logger.Info("Зарегистрирована сделка",
+	// 	slog.String("Type", orderBuy.Type.String()),
+	// 	slog.Float64("Value:", orderBuy.Price),
+	// 	slog.Float64("Quantity", orderBuy.Quantity),
+	// 	slog.String("Symbo", orderBuy.Symbo),
+	// 	slog.String("TraderID", orderBuy.TraderID.String()),
+	// )
+	//
+	// orderBook.Delete(uuidOrder1)
+	// logger.Info("Отменена сделка",
+	// 	slog.String("Type", orderBuy.Type.String()),
+	// 	slog.Float64("Value:", orderBuy.Price),
+	// 	slog.Float64("Quantity", orderBuy.Quantity),
+	// 	slog.String("Symbo", orderBuy.Symbo),
+	// 	slog.String("TraderID", orderBuy.TraderID.String()),
+	// )
+
+orderBook1 := storage.NewStore[uuid.UUID, enum.Order](10)
+
+updatedOrder, ok := orderBook1.Update(uuidOrder1, modifiers.ModifierForOrderBuy(orderSell.Quantity))
+	if ok {
+		logger.Info("Зарегистрирована сделка",
 		slog.String("Type", orderBuy.Type.String()),
+		slog.String("Status: ", updatedOrder.Status.String()),
 		slog.Float64("Value:", orderBuy.Price),
 		slog.Float64("Quantity", orderBuy.Quantity),
+		slog.String("Data: ", updatedOrder.UpdatedAt.String()),
 		slog.String("Symbo", orderBuy.Symbo),
 		slog.String("TraderID", orderBuy.TraderID.String()),
+		slog.String("Data: ", updatedOrder.UpdatedAt.String()),
 	)
 
-	orderBook.Delete(uuidOrder1)
-	logger.Info("Отменена сделка",
-		slog.String("Type", orderBuy.Type.String()),
-		slog.Float64("Value:", orderBuy.Price),
-		slog.Float64("Quantity", orderBuy.Quantity),
-		slog.String("Symbo", orderBuy.Symbo),
-		slog.String("TraderID", orderBuy.TraderID.String()),
-	)
-
-
+	}
 
 	// Новый вывод
 	orderSell.Side = enum.SideSell

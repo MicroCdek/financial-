@@ -2,6 +2,8 @@ package storage
 
 import (
 	"fmt"
+	"enump/enum"
+	"log/slog"
 	"sync"
 )
 
@@ -36,7 +38,7 @@ func (store *Store[K, V]) Get(key K) (V, bool) {
 }
 
 // удаление под Lock()
-func (store *Store[K, V]) Delete(key K, value V) bool {
+func (store *Store[K, V]) Delete(key K) bool {
 	store.mutex.Lock()
 	defer store.mutex.Unlock()
 
@@ -47,7 +49,27 @@ func (store *Store[K, V]) Delete(key K, value V) bool {
 	delete(store.items, key)
 	return true
 }
+//
+// func converterToOrder[V any](value any) enum.Order{
+// 	order := enum.Order{
+// 		ID:       value.UUID,
+// 		TraderID:  value.UUID,
+// 		Side:      value.Side,
+// 		Type:      value.OrderType,
+// 		Symbo:     value.Symbo,
+// 		Price:     value.Price,
+// 		Quantity:  value.Quantity,
+// 		Filled:    value.Filled,
+// 		Status:    value.Status,
+// 		CreatedAt: value.CreatedAt,
+// 		UpdatedAt: value.UpdatedAt,
+// 	}
+// 	return order
+// }
 
+func convertToOrder(value any) enum.Order{
+	return value.(enum.Order)
+}
 // атомарный read-modify-write под  Lock()
 func (store *Store[K, V]) Update(key K, modif func(V) V) (V, bool) {
 	store.mutex.Lock()
@@ -58,12 +80,17 @@ func (store *Store[K, V]) Update(key K, modif func(V) V) (V, bool) {
 		var zero V
 		return zero, false
 	}
-
+	
 	Updatedvalue := modif(value)
+	// после update нужно сохранить все в store
+	store.items[key] = Updatedvalue 
+	updatedOrder := convertToOrder(Updatedvalue)
+	enum.LogOrderState(&updatedOrder)
 	return Updatedvalue, true
 }
 
 type IndexedStore[K comparable, V any] struct {
+	// Тербует уточнения
 	mutex sync.RWMutex
 	order []K
 	byKey map[K]int // позволяет за О(1) узнать проядок в срезе

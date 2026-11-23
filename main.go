@@ -65,7 +65,7 @@ func main() {
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 	}
-
+	enum.LogOrderState(&orderBuy, logger)
 	orderSell := enum.Order{
 		ID:        uuidOrder2,
 		TraderID:  uuid.New(),
@@ -79,6 +79,8 @@ func main() {
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 	}
+	enum.LogOrderState(&orderSell, logger)
+
 	orderBook.Put(uuidOrder1, orderBuy)
 	orderBook.Put(uuidOrder2, orderSell)
 
@@ -101,22 +103,9 @@ func main() {
 
 orderBook1 := storage.NewStore[uuid.UUID, enum.Order](10)
 
-updatedOrder, ok := orderBook1.Update(uuidOrder1, modifiers.ModifierForOrderBuy(orderSell.Quantity))
-	if ok {
-		logger.Info("Зарегистрирована сделка",
-		slog.String("Type", orderBuy.Type.String()),
-		slog.String("Status: ", updatedOrder.Status.String()),
-		slog.Float64("Value:", orderBuy.Price),
-		slog.Float64("Quantity", orderBuy.Quantity),
-		slog.String("Data: ", updatedOrder.UpdatedAt.String()),
-		slog.String("Symbo", orderBuy.Symbo),
-		slog.String("TraderID", orderBuy.TraderID.String()),
-		slog.String("Data: ", updatedOrder.UpdatedAt.String()),
-	)
-
-	}
-
-	// Новый вывод
+orderBook1.Update(uuidOrder1, modifiers.ModifierForOrderBuy(orderSell.Quantity), logger)
+orderBook1.Update(uuidOrder2, modifiers.ModifierForOrderBuy(orderBuy.Quantity), logger)
+ // Новый вывод
 	orderSell.Side = enum.SideSell
 
 	orderBook.Put(uuidOrder1, orderBuy)

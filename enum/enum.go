@@ -95,19 +95,19 @@ type Order struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
-
-func  LogOrderState(order *Order, logger *slog.Logger){
-	logger.Info("\n\nСтатус сделки \n",
-	slog.String("Type", order.Side.String()),
-	slog.String("Type", order.Type.String()),
-	slog.String("Status: ", order.Status.String()),
-	slog.Float64("Value:", order.Price),
-	slog.Float64("Quantity", order.Quantity),
-	slog.String("Data: ", order.UpdatedAt.String()),
-	slog.String("Symbo", order.Symbo),
-	slog.String("TraderID", order.TraderID.String()),
-	slog.String("Data: ", order.UpdatedAt.String()),
-	)
+// интерфейс slog.LogValuer
+func (order *Order)LogValuer() slog.Value{
+	return slog.GroupValue(
+				 slog.String("Type", order.Type.String()),        
+	       slog.String("Side", order.Side.String()),         
+	       slog.String("Status: ", order.Status.String()),   
+	       slog.Float64("Value:", order.Price),              
+	       slog.Float64("Quantity", order.Quantity),
+				 slog.Float64("Filled: ", order.Filled),
+	  		 slog.String("Data: ", order.UpdatedAt.String()),
+	       slog.String("Symbo", order.Symbo),
+	       slog.String("TraderID", order.TraderID.String()),
+				 slog.String("Data: ", order.UpdatedAt.String()))
 }
 
 func (order *Order) Remaining() float64 {

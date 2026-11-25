@@ -1,11 +1,12 @@
 package matching
 
 import (
-	"enump/enum"
-	storage "enump/store"
 	"fmt"
 	"math"
 	"time"
+
+	"enump/enum"
+	storage "enump/store"
 
 	"github.com/google/uuid"
 )
@@ -15,7 +16,6 @@ func ExecuteTrade(
 	buyOrderID uuid.UUID,
 	sellOrderID uuid.UUID,
 ) (enum.Trade, error) {
-
 	var trade enum.Trade
 
 	// Генерируем UUID сделки
@@ -30,7 +30,6 @@ func ExecuteTrade(
 		buyOrderID,
 		sellOrderID,
 		func(buy, sell enum.Order) (enum.Order, enum.Order, error) {
-
 			// Проверяем стороны ордеров
 			if buy.Side != enum.SideBuy {
 				return buy, sell, fmt.Errorf("первый ордер не является покупкой")
@@ -92,7 +91,7 @@ func ExecuteTrade(
 			// Формируем сделку
 			trade = enum.Trade{
 				ID:         tradeID,
-				Symbol:     buy.Symbo,
+				Symbo:      buy.Symbo,
 				BuyOrderID: buy.ID,
 				SelOrderID: sell.ID,
 				BuyerID:    buy.TraderID,
@@ -105,7 +104,6 @@ func ExecuteTrade(
 			return buy, sell, nil
 		},
 	)
-
 	if err != nil {
 		return enum.Trade{}, err
 	}

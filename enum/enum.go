@@ -1,9 +1,10 @@
 package enum
 
 import (
-	"math"
 	"log/slog"
+	"math"
 	"time"
+
 	"github.com/google/uuid"
 )
 
@@ -72,7 +73,7 @@ func (status OrderStatus) String() string {
 
 type Trade struct {
 	ID         uuid.UUID
-	Symbol     string
+	Symbo      string
 	BuyOrderID uuid.UUID
 	SelOrderID uuid.UUID
 	BuyerID    uuid.UUID
@@ -95,19 +96,33 @@ type Order struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+
 // интерфейс slog.LogValuer
-func (order *Order)LogValuer() slog.Value{
+func (order *Order) LogValue() slog.Value {
 	return slog.GroupValue(
-				 slog.String("Type", order.Type.String()),        
-	       slog.String("Side", order.Side.String()),         
-	       slog.String("Status: ", order.Status.String()),   
-	       slog.Float64("Value:", order.Price),              
-	       slog.Float64("Quantity", order.Quantity),
-				 slog.Float64("Filled: ", order.Filled),
-	  		 slog.String("Data: ", order.UpdatedAt.String()),
-	       slog.String("Symbo", order.Symbo),
-	       slog.String("TraderID", order.TraderID.String()),
-				 slog.String("Data: ", order.UpdatedAt.String()))
+		slog.String("Type", order.Type.String()),
+		slog.String("Side", order.Side.String()),
+		slog.String("Status: ", order.Status.String()),
+		slog.Float64("Value:", order.Price),
+		slog.Float64("Quantity", order.Quantity),
+		slog.Float64("Filled: ", order.Filled),
+		slog.String("Data: ", order.UpdatedAt.String()),
+		slog.String("Symbo", order.Symbo),
+		slog.String("TraderID", order.TraderID.String()),
+		slog.String("Data: ", order.UpdatedAt.String()))
+}
+
+// Заполняет ордер и и показывает время заполнения
+func (order *Order) Fill(count float64) {
+	order.Filled += count
+	order.UpdatedAt = time.Now().UTC()
+
+	// В будущем учесть погрещности которые возникают с float64 при арифметических операциях
+	if order.Filled >= order.Quantity {
+		order.Status = OrderStatusFilled
+	} else {
+		order.Status = OrderStatusPartiallyFilled
+	}
 }
 
 func (order *Order) Remaining() float64 {
